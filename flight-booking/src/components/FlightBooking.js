@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from './axiosConfig'; 
+import axios from '../components/axiosconfig';
 
 const FlightBooking = () => {
   const [flights, setFlights] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [message, setMessage] = useState('');
 
@@ -13,25 +14,28 @@ const FlightBooking = () => {
 
   const fetchFlights = async () => {
     try {
-      const response = await axios.get('/api/flights/');
+      const response = await axios.get('/airlinesapi/flights/');
       setFlights(response.data.results);
+      setSearchResults(response.data.results); // Set initial search results to all flights
     } catch (error) {
       console.error('Error fetching flights:', error);
     }
   };
 
   const handleSearch = async () => {
-    try {
-      const response = await axios.get('/api/search/flights/', { params: { search: searchTerm } });
-      setFlights(response.data.results);
-    } catch (error) {
-      console.error('Error searching flights:', error);
+    if (searchTerm.trim() === '') {
+      setSearchResults(flights); // Show all flights if search term is empty
+    } else {
+      const filteredFlights = flights.filter(flight =>
+        flight.flight_number.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setSearchResults(filteredFlights); // Filter flights based on search term
     }
   };
 
   const handleBookFlight = async (flightId) => {
     try {
-      const response = await axios.post('/api/book-flight/', { flight_id: flightId }, {
+      const response = await axios.post('/airlinesapi/book_flight/', { flight_id: flightId }, {
         headers: {
           Authorization: `Token ${localStorage.getItem('token')}`,
         },
@@ -46,7 +50,7 @@ const FlightBooking = () => {
 
   const handleCancelBooking = async (bookingId) => {
     try {
-      await axios.delete(`/api/cancel-booking/${bookingId}/`, {
+      await axios.delete(`/airlinesapi/cancel-booking/${bookingId}/`, {
         headers: {
           Authorization: `Token ${localStorage.getItem('token')}`,
         },
@@ -62,6 +66,11 @@ const FlightBooking = () => {
   return (
     <div>
       <h1>Flight Booking</h1>
+
+      <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a className="navbar-brand" href="/">Flight Booking System</a>
+      </nav>
+
       <div className="input-group mb-3">
         <input
           type="text"
@@ -90,7 +99,7 @@ const FlightBooking = () => {
           </tr>
         </thead>
         <tbody>
-          {flights.map(flight => (
+          {searchResults.map(flight => (
             <tr key={flight.id}>
               <td>{flight.flight_number}</td>
               <td>{flight.airline.name}</td>
@@ -122,6 +131,7 @@ const FlightBooking = () => {
       </table>
       {message && <div className="alert alert-info">{message}</div>}
     </div>
+    
   );
 };
 

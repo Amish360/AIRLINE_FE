@@ -1,78 +1,71 @@
-// src/components/Signup.js
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+import axios from '../components/axiosconfig';
 
-const Signup = () => {
+const SignupPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [country, setCountry] = useState('');
+  const [cnic, setCNIC] = useState('');
   const [age, setAge] = useState('');
-  const [cnic, setCnic] = useState('');
-  const [phno, setPhno] = useState('');
   const [message, setMessage] = useState('');
-  const history = useHistory();
 
   const handleSignup = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/api/register/', {
-        email,
-        password,
-        country,
-        age,
-        cnic,
-        phno,
-      });
-      localStorage.setItem('access_token', response.data.access);
-      history.push('/index');
+      await axios.post('/api/register/', { email, password, cnic, age });
+      setMessage('Signup successful');
+      // Redirect to login page
+      window.location.href = '/';
     } catch (error) {
-      setMessage(error.response.data.error || 'Error during signup');
+      console.error('Error signing up:', error);
+      setMessage('Error signing up');
     }
   };
 
   return (
-    <div className="container">
+    <div>
       <h1>Signup</h1>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-      />
-      <input
-        type="text"
-        value={country}
-        onChange={(e) => setCountry(e.target.value)}
-        placeholder="Country"
-      />
-      <input
-        type="number"
-        value={age}
-        onChange={(e) => setAge(e.target.value)}
-        placeholder="Age"
-      />
-      <input
-        type="text"
-        value={cnic}
-        onChange={(e) => setCnic(e.target.value)}
-        placeholder="CNIC"
-      />
-      <input
-        type="text"
-        value={phno}
-        onChange={(e) => setPhno(e.target.value)}
-        placeholder="Phone Number"
-      />
-      <button onClick={handleSignup}>Signup</button>
-      {message && <p>{message}</p>}
+      <div className="form-group">
+        <label>Email:</label>
+        <input
+          type="email"
+          className="form-control"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+      <div className="form-group">
+        <label>Password:</label>
+        <input
+          type="password"
+          className="form-control"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </div>
+      <div className="form-group">
+        <label>CNIC:</label>
+        <input
+          type="text"
+          className="form-control"
+          value={cnic}
+          onChange={(e) => setCNIC(e.target.value)}
+        />
+      </div>
+      <div className="form-group">
+        <label>Age:</label>
+        <input
+          type="number"
+          className="form-control"
+          value={age}
+          onChange={(e) => setAge(e.target.value)}
+        />
+      </div>
+      <button className="btn btn-primary" onClick={handleSignup}>
+        Signup
+      </button>
+      <p>{message}</p>
+      <p>Already have an account? <a href="/">Login</a></p>
     </div>
   );
 };
 
-export default Signup;
+export default SignupPage;

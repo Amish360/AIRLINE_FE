@@ -1,46 +1,55 @@
-// src/components/Login.js
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+// LoginPage.js
 
-const Login = () => {
+import React, { useState } from 'react';
+import axios from '../components/axiosconfig';
+
+const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const history = useHistory();
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/api/login/', {
-        email,
-        password,
-      });
-      localStorage.setItem('access_token', response.data.access_token);
-      history.push('/index');
+      const response = await axios.post('/api/login/', { email, password });
+      localStorage.setItem('token', response.data.access_token);
+      setMessage('Login successful');
+      window.location.href = '/flights';
+      // Redirect to dashboard or another page
     } catch (error) {
-      setMessage(error.response.data.error);
+      console.error('Error logging in:', error);
+      setMessage('Error logging in');
     }
   };
 
   return (
-    <div className="container">
+    <div>
       <h1>Login</h1>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-      />
-      <button onClick={handleLogin}>Login</button>
-      {message && <p>{message}</p>}
+      <div className="form-group">
+        <label>Email:</label>
+        <input
+          type="email"
+          className="form-control"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+      <div className="form-group">
+        <label>Password:</label>
+        <input
+          type="password"
+          className="form-control"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </div>
+      <button className="btn btn-primary" onClick={handleLogin}>
+        Login
+      </button>
+      <p>{message}</p>
+      <p>Don't have an account? <a href="/signup">Signup</a></p>
+      <p>Forgot Password? <a href="/changepass">Change Password</a></p>
     </div>
   );
 };
 
-export default Login;
+export default LoginPage;
